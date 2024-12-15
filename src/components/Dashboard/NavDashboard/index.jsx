@@ -3,6 +3,7 @@ import { Button, Nav, Navbar } from "react-bootstrap";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { logoutUser } from "../../../redux/actionCreators/authActionCreators";
+import UsageButton from "../UsageButton";
 
 const NavDashboard = () => {
   const history = useHistory();
@@ -37,6 +38,7 @@ const NavDashboard = () => {
       <Nav style={{ marginRight: "60px" }}>
         {isLoggedIn ? (
           <>
+            <UsageButton />
             <Nav.Link
               className="d-flex align-items-center justify-content-between"
               style={{ pointerEvents: "unset", cursor: "text" }}

@@ -18,11 +18,13 @@ import { Provider } from 'react-redux';
 import authReducer from './redux/reducers/authReducer';
 import filefolderReducer from './redux/reducers/filefolderReducer';
 
+// add al reducers 
 const reducers = combineReducers({
   auth: authReducer,
   filefolders: filefolderReducer,
 });
 
+// create a store, which is a 'gloabl place' to store data 
 const store = createStore(
   reducers,
   composeWithDevTools(applyMiddleware(thunk))
@@ -31,6 +33,7 @@ const store = createStore(
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
+  // use the provider to make our app can access the global storage
   <Provider store={store}>
     <Router>
       <App />

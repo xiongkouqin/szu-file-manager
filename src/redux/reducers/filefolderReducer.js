@@ -15,6 +15,8 @@ import {
   UPDATE_USER_FILE_DATA,
   DELETE_FILES,
   DELETE_FOLDERS,
+  SET_USER_USAGE_STATS_LOADING,
+  SET_USER_USAGE_STATS
 } from '../actions/filefoldersActions';
 
 const initialState = {
@@ -25,6 +27,8 @@ const initialState = {
   adminFolders: null,
   adminFiles: null,
   selectedItems: [],
+  userUsageStatsLoading: true,
+  userUsageStats: {}
 };
 
 const filefolderReducer = (state = initialState, { type, payload }) => {
@@ -105,6 +109,12 @@ const filefolderReducer = (state = initialState, { type, payload }) => {
           (folder) => !payload.includes(folder.docId)
         ),
       };
+      return state;
+    case SET_USER_USAGE_STATS_LOADING:
+      state = { ...state, userUsageStatsLoading: payload };
+      return state;
+    case SET_USER_USAGE_STATS:
+      state = { ...state, userUsageStats: payload };
       return state;
     default:
       return state;

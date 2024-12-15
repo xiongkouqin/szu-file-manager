@@ -12,9 +12,12 @@ import "./App.css";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "./redux/actionCreators/authActionCreators";
 
+
+
 const App = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -28,7 +31,7 @@ const App = () => {
       <Switch>
         <Route exact path={"/"}>
           <NavbarComponent />
-          <h1>Welcome to file management system</h1>
+          {/*<h1>Welcome to file management system</h1>*/}
         </Route>
         <Route exact path="/login" component={() => <Login />}></Route>
         <Route exact path="/signup" component={() => <Register />}></Route>

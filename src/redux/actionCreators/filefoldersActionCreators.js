@@ -2,6 +2,7 @@ import { toast } from 'react-toastify';
 import { database, storage } from '../../API/firebase';
 import docModel from '../../models/docs';
 import fileModel from '../../models/files';
+import { getStorage, ref, getMetadata, listAll } from "firebase/storage";
 import {
   SET_LOADING,
   SET_ADMIN_FILES,
@@ -18,7 +19,95 @@ import {
   DESELECT_ITEMS,
   DELETE_FILES,
   DELETE_FOLDERS,
+  SET_USER_USAGE_STATS_LOADING,
+  SET_USER_USAGE_STATS
 } from '../actions/filefoldersActions';
+
+
+const setUserUsageStatsLoading = (data) => (
+  {
+    type: SET_USER_USAGE_STATS_LOADING,
+    payload: data,
+  }
+)
+
+const setUserUsageStats = (data) => (
+  {
+    type: SET_USER_USAGE_STATS,
+    payload: data,
+  }
+)
+
+export const getUserUsageStats = (userId) => async (dispatch) => {
+  if (userId) {
+    // start to fetching user usage stats, start loading...
+    dispatch(setUserUsageStatsLoading(true))
+
+    const storage = getStorage();
+
+    // create a reference to the user folder 
+    const userRef = ref(storage, 'files/' + userId)
+
+    // Define categories and file type mapping
+    const fileCategories = {
+      "Document Files": ["txt", "xml", "json", "docx", "pdf", "ppt", "pptx"],
+      "Code Files": ["html", "php", "js", "jsx", "css", "py", "c", "cpp", "java", "cs"],
+      "Image Files": ["png", "jpg", "jpeg", "gif", "svg"],
+      "Media Files": ["mp3", "mp4", "webm"]
+    };
+
+    const colors = {
+      "Document Files": ['#ff4d4f', '#ff7875', '#ffecb3', '#ffcc00', '#f56a00', '#ff9800', '#ff4500'],
+      "Code Files":['#1890ff', '#40a9ff', '#69c0ff', '#b3d8ff', '#5c6bc0', '#7986cb', '#3f51b5', '#303f9f', '#1976d2', '#1565c0'],
+      "Image Files":['#00bcd4', '#009688', '#00796b', '#4caf50', '#2e7d32'],
+      "Media Files":['#ffa500', '#ff5722', '#d32f2f']
+    }
+
+    const usageStats = {
+      totalUsage: 0,
+      categories: Object.keys(fileCategories).map((category) => ({
+        name: category,
+        files: fileCategories[category].map((type) => ({ type, size: 0 })),
+        color: colors[category] // Placeholder for colors
+      }))
+    };
+
+    try {
+      const res = await listAll(userRef);
+
+      const filePromises = res.items.map(async (itemRef) => {
+        const metadata = await getMetadata(itemRef);
+        const fileSize = metadata.size; // File size in bytes
+        const fileName = metadata.name;
+        const fileType = fileName.split(".").pop().toLowerCase();
+
+        usageStats.totalUsage += fileSize;
+
+        // Categorize file size
+        Object.keys(fileCategories).forEach((category, index) => {
+          if (fileCategories[category].includes(fileType)) {
+            const fileStat = usageStats.categories[index].files.find((f) => f.type === fileType);
+            if (fileStat) {
+              fileStat.size += fileSize;
+            }
+          }
+        });
+      });
+
+      // Wait for all metadata to be processed
+      await Promise.all(filePromises);
+
+      // Dispatch the final stats
+      dispatch(setUserUsageStats(usageStats));
+    } catch (error) {
+      toast.error("Failed to fetch usage data!");
+      console.error(error);
+    } finally {
+      dispatch(setUserUsageStatsLoading(false));
+    }
+  }
+}
+
 
 const setLoading = (data) => ({
   type: SET_LOADING,

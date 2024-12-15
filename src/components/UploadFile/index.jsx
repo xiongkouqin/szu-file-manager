@@ -22,10 +22,15 @@ const UploadFile = ({ currentFolder }) => {
     shallowEqual
   );
 
+  // 点击上传文件后执行的函数 
   const handleFileSubmit = (e) => {
+    // 阻止默认行为 
     e.preventDefault();
+    // 如果文件为空，提示需要选择文件 
     if (!file) return toast.dark("Please add file name!");
+    // 获取文件的后缀名 
     const fileExtension = file.name.split(".").reverse()[0];
+    // 允许上传的文件类型 
     const allowedExtensions = [
       "html",
       "php",
@@ -54,9 +59,12 @@ const UploadFile = ({ currentFolder }) => {
       "pdf",
     ];
 
+    // 如果是不支持的类型，提示不支持 
     if (allowedExtensions.indexOf(fileExtension) === -1) {
       return toast.dark(`File with extension ${fileExtension} not allowed!`);
     }
+
+    
     const filteredFiles =
       currentFolder === "root folder"
         ? userFiles.filter(
@@ -179,6 +187,8 @@ const UploadFile = ({ currentFolder }) => {
           )}
         </Modal.Body>
       </Modal>
+
+      {/* 文件上传的按钮，点击后 显示Modal */}
       <Button
         onClick={() => setShowModal(true)}
         variant="outline-dark"
